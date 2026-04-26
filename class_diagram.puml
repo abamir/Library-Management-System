@@ -1,0 +1,343 @@
+@startuml Library Management System Class Diagram
+
+' ==================== ENTITIES ====================
+class Book {
+    - isbn: String
+    - title: String
+    - author: String
+    - publishingYear: int
+    - status: BookStatus
+    - branchId: String
+    + Book(isbn, title, author, publishingYear, branchId)
+    + author(): String
+    + branchId(): String
+    + isbn(): String
+    + publishingYear(): int
+    + status(): BookStatus
+    + title(): String
+    + setAuthor(author: String)
+    + setBranchId(branchId: String)
+    + setPublishingYear(publishingYear: int)
+    + setStatus(status: BookStatus)
+    + setTitle(title: String)
+}
+
+class Patron {
+    - patronId: String
+    - loanHistory: List<String>
+    - name: String
+    - email: String
+    - phone: String
+    + Patron(patronId, name, email, phone)
+    + patronId(): String
+    + name(): String
+    + email(): String
+    + phone(): String
+    + setEmail(email: String)
+    + setName(name: String)
+    + setPhone(phone: String)
+    + getLoanHistory(): List<String>
+    + addLoanToHistory(isbn: String)
+}
+
+class Loan {
+    - loanId: String
+    - isbn: String
+    - patronId: String
+    - checkoutDate: LocalDate
+    - returnDate: LocalDate
+    + Loan(loanId, isbn, patronId, checkoutDate)
+    + isbn(): String
+    + checkoutDate(): LocalDate
+    + loanId(): String
+    + patronId(): String
+    + returnDate(): LocalDate
+    + isOpen(): boolean
+    + close()
+}
+
+class Branch {
+    - branchId: String
+    - name: String
+    + Branch(branchId, name)
+    + branchId(): String
+    + name(): String
+    + setName(name: String)
+}
+
+class Reservation {
+    - reservationId: String
+    - isbn: String
+    - patronId: String
+    - reservationDateTime: LocalDateTime
+    - status: ReservationStatus
+    + Reservation(reservationId, isbn, patronId, reservationDateTime)
+    + reservationId(): String
+    + isbn(): String
+    + patronId(): String
+    + reservationDateTime(): LocalDateTime
+    + status(): ReservationStatus
+    + setStatus(status: ReservationStatus)
+    + isActive(): boolean
+}
+
+' ==================== ENUMS ====================
+enum BookStatus {
+    AVAILABLE
+    BORROWED
+    RESERVED
+}
+
+enum ReservationStatus {
+    WAITING
+    NOTIFIED
+    FULFILLED
+    CANCELLED
+}
+
+' ==================== REPOSITORIES ====================
+interface BookRepository {
+    + save(book: Book)
+    + findByIsbn(isbn: String): Optional<Book>
+    + findAll(): List<Book>
+    + deleteByIsbn(isbn: String)
+    + existsByIsbn(isbn: String): boolean
+}
+
+interface PatronRepository {
+    + save(patron: Patron)
+    + findById(patronId: String): Optional<Patron>
+    + findAll(): List<Patron>
+    + deleteById(patronId: String)
+    + existsById(patronId: String): boolean
+}
+
+interface LoanRepository {
+    + save(loan: Loan)
+    + findById(loanId: String): Optional<Loan>
+    + findAll(): List<Loan>
+    + deleteById(loanId: String)
+    + existsById(loanId: String): boolean
+}
+
+interface BranchRepository {
+    + save(branch: Branch)
+    + findById(branchId: String): Optional<Branch>
+    + findAll(): List<Branch>
+    + deleteById(branchId: String)
+    + existsById(branchId: String): boolean
+}
+
+interface ReservationRepository {
+    + save(reservation: Reservation)
+    + findById(reservationId: String): Optional<Reservation>
+    + findAll(): List<Reservation>
+    + deleteById(reservationId: String)
+    + existsById(reservationId: String): boolean
+}
+
+class RepositoryFactory {
+    + createBookRepository(): BookRepository
+    + createPatronRepository(): PatronRepository
+    + createLoanRepository(): LoanRepository
+    + createBranchRepository(): BranchRepository
+    + createReservationRepository(): ReservationRepository
+}
+
+' ==================== IN-MEMORY IMPLEMENTATIONS ====================
+class BookRepositoryImpl {
+    + save(book: Book)
+    + findByIsbn(isbn: String): Optional<Book>
+    + findAll(): List<Book>
+    + deleteByIsbn(isbn: String)
+    + existsByIsbn(isbn: String): boolean
+}
+
+class PatronRepositoryImpl {
+    + save(patron: Patron)
+    + findById(patronId: String): Optional<Patron>
+    + findAll(): List<Patron>
+    + deleteById(patronId: String)
+    + existsById(patronId: String): boolean
+}
+
+class LoanRepositoryImpl {
+    + save(loan: Loan)
+    + findById(loanId: String): Optional<Loan>
+    + findAll(): List<Loan>
+    + deleteById(loanId: String)
+    + existsById(loanId: String): boolean
+}
+
+class BranchRepositoryImpl {
+    + save(branch: Branch)
+    + findById(branchId: String): Optional<Branch>
+    + findAll(): List<Branch>
+    + deleteById(branchId: String)
+    + existsById(branchId: String): boolean
+}
+
+class ReservationRepositoryImpl {
+    + save(reservation: Reservation)
+    + findById(reservationId: String): Optional<Reservation>
+    + findAll(): List<Reservation>
+    + deleteById(reservationId: String)
+    + existsById(reservationId: String): boolean
+}
+
+' ==================== SERVICES ====================
+interface LendingService {
+    + checkoutBook(isbn: String, patronId: String): Loan
+    + returnBook(isbn: String): Loan
+    + checkoutBook(isbn: String, patronId: String, branchId: String): Loan
+    + getLoansByPatronId(patronId: String): List<Loan>
+    + listAllLoans(): List<Loan>
+}
+
+interface CatalogService {
+    + addBook(book: Book)
+    + removeBook(isbn: String)
+    + findBookByIsbn(isbn: String): Optional<Book>
+    + listAllBooks(): List<Book>
+    + updateBookDetails(isbn: String, title: String, author: String, publishingYear: int)
+}
+
+interface PatronService {
+    + registerPatron(patron: Patron)
+    + removePatron(patronId: String)
+    + findPatronById(patronId: String): Optional<Patron>
+    + listAllPatrons(): List<Patron>
+    + updatePatronDetails(patronId: String, name: String, email: String, phone: String)
+}
+
+interface BranchService {
+    + addBranch(branch: Branch)
+    + removeBranch(branchId: String)
+    + findBranchById(branchId: String): Optional<Branch>
+    + listAllBranches(): List<Branch>
+    + updateBranchDetails(branchId: String, name: String)
+}
+
+interface ReservationService {
+    + createReservation(isbn: String, patronId: String): Reservation
+    + cancelReservation(reservationId: String)
+    + findReservationById(reservationId: String): Optional<Reservation>
+    + listAllReservations(): List<Reservation>
+    + getReservationsByPatronId(patronId: String): List<Reservation>
+}
+
+interface InventoryService {
+    + getAvailableBooks(): List<Book>
+    + getBooksByBranch(branchId: String): List<Book>
+    + updateBookStatus(isbn: String, status: BookStatus)
+}
+
+' ==================== OBSERVER PATTERN ====================
+interface ReservationObserver {
+    + onBookAvailable(reservation: Reservation, book: Book, patron: Patron)
+}
+
+interface ReservationSubject {
+    + addObserver(observer: ReservationObserver)
+    + removeObserver(observer: ReservationObserver)
+    + notifyObservers(reservation: Reservation, book: Book, patron: Patron)
+}
+
+class ConsoleReservationObserver {
+    + onBookAvailable(reservation: Reservation, book: Book, patron: Patron)
+}
+
+' ==================== UTILITIES ====================
+class IdGenerator {
+    + generateBookId(): String
+    + generatePatronId(): String
+    + generateLoanId(): String
+    + generateBranchId(): String
+    + generateReservationId(): String
+}
+
+class InputUtil {
+    + readString(prompt: String): String
+    + readInt(prompt: String): int
+    + readEmail(prompt: String): String
+    + readPhone(prompt: String): String
+}
+
+class ValidationUtil {
+    + validateEmail(email: String): boolean
+    + validatePhone(phone: String): boolean
+    + validateIsbn(isbn: String): boolean
+}
+
+class AppConfig {
+    + getMaxLoanDuration(): int
+    + getMaxReservationsPerPatron(): int
+}
+
+' ==================== MAIN & UI ====================
+class Main {
+    + main(args: String[])
+}
+
+class ConsoleApp {
+    + run()
+}
+
+' ==================== RELATIONSHIPS ====================
+
+' Entity Relationships
+Book "1" *-- "1" BookStatus : has
+Reservation "1" *-- "1" ReservationStatus : has
+Book "1" -- "0..*" Loan : "checked out in"
+Patron "1" -- "0..*" Loan : "borrows"
+Book "1" -- "0..*" Reservation : "reserved by"
+Patron "1" -- "0..*" Reservation : "makes"
+Book "1" -- "1" Branch : "belongs to"
+Patron "1" -- "0..*" Patron : "has loan history"
+
+' Repository Relationships
+RepositoryFactory ..> BookRepository : creates
+RepositoryFactory ..> PatronRepository : creates
+RepositoryFactory ..> LoanRepository : creates
+RepositoryFactory ..> BranchRepository : creates
+RepositoryFactory ..> ReservationRepository : creates
+
+BookRepository <|.. BookRepositoryImpl
+PatronRepository <|.. PatronRepositoryImpl
+LoanRepository <|.. LoanRepositoryImpl
+BranchRepository <|.. BranchRepositoryImpl
+ReservationRepository <|.. ReservationRepositoryImpl
+
+' Service Dependencies (simplified - services use repositories)
+LendingService ..> BookRepository : uses
+LendingService ..> PatronRepository : uses
+LendingService ..> LoanRepository : uses
+CatalogService ..> BookRepository : uses
+PatronService ..> PatronRepository : uses
+BranchService ..> BranchRepository : uses
+ReservationService ..> ReservationRepository : uses
+InventoryService ..> BookRepository : uses
+
+' Observer Pattern
+ReservationObserver <|.. ConsoleReservationObserver
+ReservationSubject ..> ReservationObserver : notifies
+
+' Main Application
+Main ..> ConsoleApp : creates
+ConsoleApp ..> LendingService : uses
+ConsoleApp ..> CatalogService : uses
+ConsoleApp ..> PatronService : uses
+ConsoleApp ..> BranchService : uses
+ConsoleApp ..> ReservationService : uses
+
+' Utility Usage
+LendingService ..> IdGenerator : uses
+CatalogService ..> IdGenerator : uses
+PatronService ..> IdGenerator : uses
+BranchService ..> IdGenerator : uses
+ReservationService ..> IdGenerator : uses
+
+ConsoleApp ..> InputUtil : uses
+PatronService ..> ValidationUtil : uses
+
+@enduml

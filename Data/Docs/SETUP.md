@@ -20,4 +20,3 @@ javac -version
 
 IntelliJ IDEA (Recommended)
 - Eclipse
-- VS Code
